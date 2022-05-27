@@ -3,53 +3,30 @@
     <html lang="en">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta
+  name="description"
+  content="This Website Is all About an Application of Recurrent Neural Network and  solvin a bottleneck of supervised learning.">
 {% load static %}
-<link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
-<link href="{% static 'css/bootstrap-utilities.css' %}" rel="stylesheet">
-<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-<link href="{% static 'css/dropdown.css' %}" rel="stylesheet">
+<link rel="preload" href="{% static 'css/bootstrap.min.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" />
-<script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
 <head>
     <title>Predict The Word!!</title>
 </head>
     
 <body>
-    <h1 class="panel-title fw-bold text-center mt-5">Bi-Gram RNN Model To Generate Next Predicted Word [Prototype 3]</h1>
+    <h1 class="panel-title fw-bold text-center mt-5">Bi-Gram RNN Model To Generate Next Predicted Word [Prototype 4]</h1>
         <div class="container fs-4 mt-5 height-150 d-flex align-items-center justify-content-center">
         <textarea type="text" rows=3 cols=53 id="messageText" placeholder="Enter Words Here"></textarea>
         </div>
         <div class="text-center mx-auto w-75 mt-3 hovered">
-            <select name = "" class="fs-6 fw-bold form-control form-select mt-3 text-center btn-outline-white btn-light shadow w-25 align-middle mx-auto text" onchange="appendLastWord(this.value); this.selectedIndex=0;" id = "select" data-toggle="dropdown" multiple>
+           <select name = "" class="fs-6 fw-bold form-control form-select mt-3 text-center btn-outline-white btn-light shadow w-25 align-middle mx-auto text" onchange="appendLastWord(this.value); this.selectedIndex=0;" id = "select" data-toggle="dropdown" multiple>
                 <OPTION></OPTION>
             </select>
-        </div>   
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                        <button type="button" class="btn-close shadow-lg" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <label for="exampleModalLabel" >Enter Sentence</label>
-                        <input type="text" id="textField" class="form-control">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" onclick="tryit()" data-bs-dismiss="modal" class="btn btn-primary shadow-sm">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div> 
-        <div class="text-center mx-auto w-75 mt-3 hovered">      
-            <button type="button" class="btn btn-warning shadow-sm btn-outline-secondary rounded-10" data-bs-toggle="modal" id = "modalBtn" data-bs-target="#exampleModal">
-                Add Sentence To Dictionary
-            </button>
         </div>
     
-      <script>
-            var host = "127.0.0.1";
+      <script async defer>
+          var host = "127.0.0.1";
             var tarea = document.getElementById("messageText");
             var ws = new WebSocket("ws://"+host+":8000/ws");
             var savingUnknown = new WebSocket("ws://"+host+":8000/savetovar");
@@ -63,29 +40,22 @@
                 rw.send('write');
                 rw.send('read');
             }, 60000);
-            
-            function tryit(){
-                var textOfModal = document.getElementById("textField").value.toLowerCase();
-                if(textOfModal.split(" ").length < 2) alert("Please enter at least 2 words");
-                else savingUnknown.send(textOfModal);
-                document.getElementById("textField").value = ""
-            }
 
             function appendLastWord(value){
                 if(value === "No Results Found From model!!"){
-                    document.getElementById("modalBtn").click(); 
+                document.getElementById("modalBtn").click(); 
+            }
+            else if(value === "Select"){
+                passed = true;
+            }
+            else {
+                if(tarea.value[tarea.value.length-1] === " "){
+                    tarea.value += value;
                 }
-                else if(value === "Select"){
-                    passed = true;
-                }
-                else {
-                    if(tarea.value[tarea.value.length-1] === " "){
-                        tarea.value += value;
-                    }
-                    else{
-                        tarea.value += " " + value;
-                    }                    
-                }
+                else{
+                    tarea.value += " " + value;
+                }                    
+            }
             }
 
             ws.onmessage = function(event){
@@ -115,6 +85,13 @@
                 let timer;
                 var inpt = window.document.getElementById("messageText");                
                 inpt.addEventListener("keydown", clearTimeout(timer));
+                inpt.addEventListener('keypress', function (e) {
+                    if (e.keyCode == 46) {
+                        var textOfDict = inpt.value.toLowerCase().replace(/[,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+                        if(textOfDict.split(" ").length < 2) alert("Please enter at least 2 words");
+                        else savingUnknown.send(textOfDict);
+                    }
+                });
 
                 inpt.addEventListener("keyup", timer = () => setTimeout(() => {                        
                         var lword = inpt.value.split(" ");
