@@ -16,18 +16,17 @@
     
 <body>
     <h1 class="panel-title fw-bold text-center mt-5">Bi-Gram RNN Model To Generate Next Predicted Word [Prototype 4]</h1>
-        <div class="container fs-4 mt-5 height-150 d-flex align-items-center justify-content-center">
-        <textarea type="text" rows=3 cols=53 id="messageText" placeholder="Enter Words Here"></textarea>
+        <div class="container fs-3 mt-5 height-150 d-flex align-items-center justify-content-center">
+        <textarea type="text" rows=3 cols=53 id="messageText" class="form-control fs-4 w-50 btn-light btn-outline-white" placeholder="Enter Words Here" auofocus></textarea>
         </div>
         <div class="text-center mx-auto w-75 mt-3 hovered">
-           <select name = "" class="fs-6 fw-bold form-control form-select mt-3 text-center btn-outline-white btn-light shadow w-25 align-middle mx-auto text" onchange="appendLastWord(this.value); this.selectedIndex=0;" id = "select" data-toggle="dropdown" multiple>
+           <select name = "" class="fs-5 fw-bold form-control mt-3 text-center btn-light btn-outline-white w-25 align-middle mx-auto text" onchange="appendLastWord(this.value); this.selectedIndex=0;" id = "select" data-toggle="dropdown" multiple>
                 <OPTION></OPTION>
             </select>
         </div>
     
       <script async defer>
-          var host = "127.0.0.1";
-            var tarea = document.getElementById("messageText");
+            var host = "127.0.0.1";
             var ws = new WebSocket("ws://"+host+":8000/ws");
             var savingUnknown = new WebSocket("ws://"+host+":8000/savetovar");
             var rw = new WebSocket("ws://"+host+":8000/rw");
@@ -40,9 +39,9 @@
                 rw.send('write');
                 rw.send('read');
             }, 60000);
-
+            var tarea = document.getElementById("messageText");
             function appendLastWord(value){
-                if(value === "No Results Found From model!!"){
+                if(value === "No Results Found!!"){
                 document.getElementById("modalBtn").click(); 
             }
             else if(value === "Select"){
@@ -87,9 +86,14 @@
                 inpt.addEventListener("keydown", clearTimeout(timer));
                 inpt.addEventListener('keypress', function (e) {
                     if (e.keyCode == 46) {
-                        var textOfDict = inpt.value.toLowerCase().replace(/[,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-                        if(textOfDict.split(" ").length < 2) alert("Please enter at least 2 words");
-                        else savingUnknown.send(textOfDict);
+                        var textOfDict = inpt.value.toLowerCase().replace(/[,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace("  ", " ");
+                        var l = textOfDict.split(" ");
+                        
+                        if(l[l.length - 1] !== ""){
+                            if(textOfDict.split(" ").length < 2) alert("Please enter at least 2 words");
+                            else savingUnknown.send(textOfDict);
+                        }
+                        else alert("Please enter at least 2 words");
                     }
                 });
 
@@ -97,11 +101,11 @@
                         var lword = inpt.value.split(" ");
                         lword = Array.from(new Set(lword));
                         if(lword.length >= 1 && inpt.value != ""){
-                            if(lword[lword.length - 1] == ""){
+                            if(lword[lword.length - 1] === ""){
                                 lword.pop();
                             }
-                            var sendit = lword[lword.length - 1].toLowerCase();
-                            ws.send(sendit);                           
+                            var sendit = lword[lword.length - 1].toLowerCase().replace(/[,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace("  ", " ");
+                            if(sendit !== "") ws.send(sendit);                           
                         }  
                     }, 100)
                 );
